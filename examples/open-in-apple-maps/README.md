@@ -1,43 +1,30 @@
-# Example: Open in Apple Maps
+# 範例：在 Apple 地圖開啟
 
-A Share Sheet shortcut: share any Google Maps link (or an address) to it, and
-the same place opens in Apple Maps.
+一支分享頁捷徑：把任何 Google Maps 連結（或一段地址）分享給它，同一個地點就會用 Apple 地圖打開。
 
-## Why the common version is broken
+## 為什麼常見的版本是壞的
 
-Google Maps place URLs contain **two** coordinate pairs:
+Google Maps 的地點連結裡有**兩組**座標：
 
-| Pair | Meaning |
+| 座標 | 意義 |
 | --- | --- |
-| `@24.1560,120.6630` | the map **viewport centre** when the link was copied — moves with the user's panning |
-| `!3d24.1234!4d120.5678` | the **place pin** itself |
+| `@24.1560,120.6630` | 複製連結當下**地圖畫面的中心** — 使用者滑過地圖就會跟著跑掉 |
+| `!3d24.1234!4d120.5678` | **地點本身的釘點** |
 
-Shortcuts floating around parse the `@` pair (or nothing at all, when handed
-an unexpanded `maps.app.goo.gl` short link), so Apple Maps opens "nearby but
-wrong".
+流傳的捷徑解析的是 `@` 那組（或者拿到沒展開的 `maps.app.goo.gl` 短連結，什麼都解析不到），所以 Apple 地圖打開的是「附近，但不是那個地方」。
 
-## The fix (17 actions, zero conditionals)
+## 修法（17 個動作，零條件分支）
 
-1. **Expand URL** — resolve short links first.
-2. **URL Decode** — so `%2C` commas and percent-encoded names parse cleanly.
-3. An ordered **Replace Text (regex)** chain; each rule fires only on match:
-   pin coords → viewport coords → `ll`/`center`/`sll` → `viewpoint` →
-   `q=loc:` coords → `/place/<name>` → `q` → `query` → `destination` →
-   strip `loc:` → `+` to space.
-4. **URL Encode** the result, build `https://maps.apple.com/?q=<result>`,
-   **Open URLs**. A `q=` search works for both coordinates and names, which
-   is what makes the branch-free design possible.
+1. **展開 URL** — 先把短連結還原。
+2. **URL 解碼** — 讓 `%2C` 逗號和百分比編碼的地名能乾淨解析。
+3. 一串有順序的**取代文字（正規表示式）**，每條只在符合時才改寫：釘點座標 → 畫面中心座標 → `ll`/`center`/`sll` → `viewpoint` → `q=loc:` 座標 → `/place/<地名>` → `q` → `query` → `destination` → 去掉 `loc:` → `+` 換成空白。
+4. 把結果 **URL 編碼**，組成 `https://maps.apple.com/?q=<結果>`，**開啟 URL**。用 `q=` 搜尋對座標和地名都成立，這正是這個設計可以不用條件分支的原因。
 
-## Files
+## 檔案
 
-- `build.py` — builds the unsigned `.shortcut` (icon and name match the
-  original shortcut this replaces).
-- `test_logic.py` — simulates the exact chain in Python; 7 cases covering
-  pin vs. viewport, text/coordinate search URLs, directions, `ll`, and a
-  plain address. Run it before every build.
+- `build.py` — 組裝未簽署的 `.shortcut`（圖示與名稱與它取代的原版捷徑相同）。
+- `test_logic.py` — 用 Python 模擬同一套規則鏈；7 個案例涵蓋釘點 vs. 畫面中心、文字/座標搜尋網址、導航、`ll` 參數和純地址。每次組裝前先跑它。
 
-## Install
+## 安裝
 
-Build, sign (see the repo's `SKILL.md`, Step 4), send the signed file to the
-iPhone, tap it, **Add Shortcut**. Share any Google Maps place to it and
-check that Apple Maps lands on the place itself.
+組裝 → 簽署（見 repo 的 `SKILL.md` 第 4 步）→ 把簽好的檔案傳到 iPhone → 點開 →「加入捷徑」。之後把任何 Google Maps 地點分享給它，確認 Apple 地圖落在地點本尊上。
