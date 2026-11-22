@@ -10,6 +10,24 @@
 4. **簽署** — iOS 15 之後，未簽署的 `.shortcut` 檔案會被拒絕，只跳一句「無法載入檔案」。簽署可以用 Mac（`shortcuts sign`），或遠端簽署服務如 [Shortcuty Sign](https://sign.shortcuty.app)、RoutineHub HubSign（上傳前必須先取得使用者同意 — agent 要先問）。
 5. **交付** — 交給使用者的必須是簽署完成的檔案（驗證開頭是 `AEA1` 魔術字節），使用者點一下就能安裝，再附一個具體的實機測試方式。
 
+## 安裝
+
+最快的方式是透過 [npm](https://www.npmjs.com/package/apple-shortcuts-skill) 一行安裝（需要 Node.js 18+）：
+
+```bash
+npx apple-shortcuts-skill
+```
+
+這會把 `SKILL.md`、`tools/`、`examples/` 裝進 `~/.claude/skills/apple-shortcuts-authoring/`，重開你的 agent 就能用。
+
+想裝到別的 skills 資料夾（例如 Codex 的），把目標路徑當參數傳入：
+
+```bash
+npx apple-shortcuts-skill ~/.agents/skills/apple-shortcuts-authoring
+```
+
+也可以手動安裝：clone 這個 repo，把 `SKILL.md`、`tools/`、`examples/` 複製到你的 skills 資料夾裡的 `apple-shortcuts-authoring/` 即可。
+
 ## 內容
 
 - [`SKILL.md`](SKILL.md) — skill 本體。放進你的 agent 的 skills 資料夾（Claude Code、Codex、Muse……），agent 就能照著做。
